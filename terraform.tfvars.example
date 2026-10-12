@@ -1,0 +1,63 @@
+# ==============================================================================
+# Google Cloud & Resource Configuration
+# ==============================================================================
+project_id      = "your-gcp-project-id"
+region          = "us-central1"
+resource_prefix = "cr-logs-dd"
+
+# ==============================================================================
+# Cloud Run Filtering
+# ==============================================================================
+# Leave empty to route logs for ALL Cloud Run services in the project,
+# or specify a list of service names:
+# cloud_run_service_names = ["orders-service", "auth-service"]
+cloud_run_service_names = []
+
+# Include Cloud Run Jobs (batch runs) alongside standard service revisions
+include_cloud_run_jobs = false
+
+# Minimum log severity to export (DEFAULT, DEBUG, INFO, NOTICE, WARNING, ERROR, CRITICAL)
+log_min_severity = "DEFAULT"
+
+# Optional custom filter override. If provided, overrides all automatic filter logic:
+# custom_log_filter = "resource.type = \"cloud_run_revision\" AND severity >= WARNING"
+
+# ==============================================================================
+# Datadog Configuration
+# ==============================================================================
+# Supported sites: datadoghq.com (US1), datadoghq.eu (EU1), us3.datadoghq.com (US3),
+# us5.datadoghq.com (US5), ap1.datadoghq.com (AP1), ddog-gov.com (US1-FED)
+datadog_site = "datadoghq.com"
+
+# Provide your Datadog API Key (will be stored in Secret Manager):
+datadog_api_key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Alternatively, if you already have the API key in Secret Manager, provide its version resource:
+# existing_secret_version_id = "projects/your-gcp-project-id/secrets/my-dd-key/versions/latest"
+
+# ==============================================================================
+# Dataflow Pipeline Tuning
+# ==============================================================================
+dataflow_machine_type            = "n1-standard-2"
+dataflow_max_workers             = 4
+dataflow_num_workers             = 1
+dataflow_batch_count             = 100
+dataflow_parallelism             = 1
+dataflow_on_delete               = "drain"
+dataflow_worker_ip_configuration = "WORKER_IP_PUBLIC"
+
+# If using private worker IPs inside an enterprise VPC:
+# dataflow_worker_ip_configuration = "WORKER_IP_PRIVATE"
+# dataflow_network                 = "default"
+# dataflow_subnetwork              = "regions/us-central1/subnetworks/default"
+
+# ==============================================================================
+# Metadata Labels
+# ==============================================================================
+labels = {
+  managed_by  = "terraform"
+  environment = "production"
+  integration = "datadog"
+  workload    = "cloud-run-logs"
+}
+
