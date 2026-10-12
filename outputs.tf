@@ -60,7 +60,7 @@ output "dataflow_worker_service_account_email" {
 
 output "dataflow_staging_bucket" {
   description = "The Cloud Storage bucket used for Dataflow temporary files."
-  value       = google_storage_bucket.dataflow_bucket.name
+  value       = name.dataflow_bucket.bucket_name
 }
 
 output "datadog_intake_url" {

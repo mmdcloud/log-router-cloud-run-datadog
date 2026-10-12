@@ -1,39 +1,41 @@
 # ------------------------------------------------------------------------------
 # Google Cloud Storage: Dataflow Staging & Temporary Storage
 # ------------------------------------------------------------------------------
-resource "google_storage_bucket" "dataflow_bucket" {
-  name                        = "${var.resource_prefix}-dataflow-${random_id.suffix.hex}"
-  project                     = var.project_id
-  location                    = var.region
-  storage_class               = "STANDARD"
+module "dataflow_bucket" {
+  source     = "./modules/gcs"
+  project_id = var.project_id
+  location   = var.region
+  name       = "${var.resource_prefix}-dataflow-${random_id.suffix.hex}"
+  cors = [
+    {
+      origin          = ["*"]
+      max_age_seconds = 3600
+      method          = ["GET", "POST", "PUT", "DELETE"]
+      response_header = ["*"]
+    }
+  ]
+  versioning = true
+  lifecycle_rules = [
+    {
+      condition = {
+        age = 14
+      }
+      action = {
+        type = "Delete"
+      }
+    },
+    {
+      condition = {
+        age = 1
+      }
+      action = {
+        type = "AbortIncompleteMultipartUpload"
+      }
+    }
+  ]
+  contents                    = []
+  notifications               = []
+  force_destroy               = true # false for production
   uniform_bucket_level_access = true
-  public_access_prevention    = "enforced"
-  force_destroy               = var.storage_bucket_force_destroy
-  labels                      = var.labels
-
-  versioning {
-    enabled = true
-  }
-
-  # Automatically clean up temporary staging and pipeline files
-  lifecycle_rule {
-    condition {
-      age = 14 # days
-    }
-    action {
-      type = "Delete"
-    }
-  }
-
-  # Abort incomplete multipart uploads after 1 day to prevent dangling storage costs
-  lifecycle_rule {
-    condition {
-      age = 1
-    }
-    action {
-      type = "AbortIncompleteMultipartUpload"
-    }
-  }
-
-  depends_on = [google_project_service.required_apis]
+  depends_on                  = [google_project_service.required_apis]
 }

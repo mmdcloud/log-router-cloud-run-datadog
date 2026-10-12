@@ -5,7 +5,7 @@ module "pubsub_to_datadog" {
   source                 = "./modules/dataflow/classic-template"
   name                   = var.dataflow_job_name != "" ? var.dataflow_job_name : "${var.resource_prefix}-stream"  
   template_gcs_path      = "gs://dataflow-templates/latest/Cloud_PubSub_to_Datadog"
-  temp_gcs_location      = "gs://${google_storage_bucket.dataflow_bucket.name}/temp"
+  temp_gcs_location      = "gs://${module.dataflow_bucket.bucket_name}/temp"
   service_account_email  = google_service_account.dataflow_worker.email
   machine_type           = var.dataflow_machine_type
   max_workers            = var.dataflow_max_workers

@@ -45,7 +45,7 @@ resource "google_pubsub_topic_iam_member" "worker_dlq_publisher" {
 
 # 5. Bucket-level Storage Object Admin permission on the Dataflow temp/staging bucket
 resource "google_storage_bucket_iam_member" "worker_storage_admin" {
-  bucket = google_storage_bucket.dataflow_bucket.name
+  bucket = name.dataflow_bucket.bucket_name
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.dataflow_worker.email}"
 }
