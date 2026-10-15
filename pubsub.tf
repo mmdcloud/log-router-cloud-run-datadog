@@ -10,6 +10,7 @@ module "logs_topic" {
 
   subscriptions = {
     "${var.resource_prefix}-logs-sub" = {
+      subscription_name          = "${var.resource_prefix}-logs-sub"
       ack_deadline_seconds       = var.pubsub_ack_deadline_seconds
       message_retention_duration = var.pubsub_message_retention_duration
       retain_acked_messages      = false
@@ -29,7 +30,8 @@ module "dlq_topic" {
   topic_name = "${var.resource_prefix}-dlq"
 
   subscriptions = {
-    "${var.resource_prefix}-logs-sub" = {
+    "${var.resource_prefix}-dlq-sub" = {
+      subscription_name          = "${var.resource_prefix}-dlq-sub"
       ack_deadline_seconds       = 60
       message_retention_duration = "604800s" # 7 days
       retain_acked_messages      = false
@@ -37,7 +39,7 @@ module "dlq_topic" {
     }
   }
 
-  labels     = var.labels
-  
+  labels = var.labels
+
   depends_on = [google_project_service.required_apis]
 }

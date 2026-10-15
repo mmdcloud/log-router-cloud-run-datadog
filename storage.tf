@@ -35,7 +35,27 @@ module "dataflow_bucket" {
   ]
   contents                    = []
   notifications               = []
-  force_destroy               = true # false for production
+  force_destroy               = var.storage_bucket_force_destroy
   uniform_bucket_level_access = true
   depends_on                  = [google_project_service.required_apis]
+}
+
+# Stage the JavaScript UDF to Cloud Storage for payload transformation & replay handling
+resource "google_storage_bucket_object" "udf_transform" {
+  count  = var.enable_udf ? 1 : 0
+  name   = "udf/transform.js"
+  bucket = module.dataflow_bucket.bucket_name
+  source = "${path.module}/udf/transform.js"
+
+  depends_on = [module.dataflow_bucket]
+}
+
+# Stage the JavaScript UDF to Cloud Storage for payload transformation & replay handling
+resource "google_storage_bucket_object" "udf_transform" {
+  count  = var.enable_udf ? 1 : 0
+  name   = "udf/transform.js"
+  bucket = module.dataflow_bucket.bucket_name
+  source = "${path.module}/udf/transform.js"
+
+  depends_on = [module.dataflow_bucket]
 }

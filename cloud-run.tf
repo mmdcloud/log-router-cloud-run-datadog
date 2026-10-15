@@ -9,7 +9,7 @@ module "artifact_registry" {
   description   = var.artifact_repository_description
   repository_id = var.artifact_repository_id
 
-  depends_on = [google_project_service.apis]
+  depends_on = [google_project_service.required_apis]
 }
 
 resource "null_resource" "build_and_push_image" {

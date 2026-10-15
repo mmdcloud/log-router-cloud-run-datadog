@@ -1,3 +1,8 @@
+# ------------------------------------------------------------------------------
+# Google Cloud Provider & Project Data
+# ------------------------------------------------------------------------------
+data "google_project" "project" {}
+
 # Generate a random suffix for globally unique resources (e.g. GCS bucket names)
 resource "random_id" "suffix" {
   byte_length = 4
@@ -47,7 +52,9 @@ resource "google_project_service" "required_apis" {
     "dataflow.googleapis.com",
     "storage.googleapis.com",
     "secretmanager.googleapis.com",
-    "compute.googleapis.com"
+    "compute.googleapis.com",
+    "run.googleapis.com",
+    "artifactregistry.googleapis.com"
   ]) : toset([])
 
   project            = var.project_id

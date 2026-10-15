@@ -36,7 +36,7 @@ datadog_api_key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # existing_secret_version_id = "projects/your-gcp-project-id/secrets/my-dd-key/versions/latest"
 
 # ==============================================================================
-# Dataflow Pipeline Tuning
+# Primary Dataflow Pipeline Tuning
 # ==============================================================================
 dataflow_machine_type            = "n1-standard-2"
 dataflow_max_workers             = 4
@@ -52,6 +52,25 @@ dataflow_worker_ip_configuration = "WORKER_IP_PUBLIC"
 # dataflow_subnetwork              = "regions/us-central1/subnetworks/default"
 
 # ==============================================================================
+# UDF (User-Defined Function) Configuration
+# ==============================================================================
+# In accordance with Google Cloud reference architecture, the UDF decodes
+# replayed dead-letter messages and tracks delivery attempts.
+enable_udf        = true
+udf_function_name = "process"
+
+# ==============================================================================
+# Secondary (Backup / Replay) Pipeline Configuration
+# ==============================================================================
+# Set to 'true' only when you need to replay messages from the DLQ subscription
+# back into the primary log topic (AFTER fixing root cause of delivery failure).
+# Set back to 'false' once DLQ backlog reaches 0.
+deploy_replay_job   = false
+replay_machine_type = "n1-standard-2"
+replay_max_workers  = 2
+replay_on_delete    = "drain"
+
+# ==============================================================================
 # Metadata Labels
 # ==============================================================================
 labels = {
@@ -60,4 +79,3 @@ labels = {
   integration = "datadog"
   workload    = "cloud-run-logs"
 }
-

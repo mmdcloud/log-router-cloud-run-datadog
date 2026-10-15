@@ -93,7 +93,7 @@ variable "existing_secret_version_id" {
 }
 
 # ------------------------------------------------------------------------------
-# Dataflow Pipeline Configuration
+# Primary Dataflow Pipeline Configuration
 # ------------------------------------------------------------------------------
 
 variable "dataflow_job_name" {
@@ -171,6 +171,60 @@ variable "dataflow_on_delete" {
 }
 
 # ------------------------------------------------------------------------------
+# UDF (User-Defined Function) Configuration
+# ------------------------------------------------------------------------------
+
+variable "enable_udf" {
+  type        = bool
+  default     = true
+  description = "Whether to deploy and attach the JavaScript UDF to decode replayed messages and tally delivery attempts as recommended in the Google architecture reference."
+}
+
+variable "udf_function_name" {
+  type        = string
+  default     = "process"
+  description = "Name of the JavaScript UDF function inside the transform script."
+}
+
+# ------------------------------------------------------------------------------
+# Secondary (Backup / Replay) Pipeline Configuration
+# ------------------------------------------------------------------------------
+
+variable "deploy_replay_job" {
+  type        = bool
+  default     = false
+  description = "Whether to deploy the secondary Dataflow replay pipeline (Pub/Sub to Pub/Sub) to move failed messages from the DLQ subscription back to the main logs topic."
+}
+
+variable "replay_job_name" {
+  type        = string
+  default     = ""
+  description = "Custom name for the Dataflow replay pipeline. Defaults to '<resource_prefix>-replay-stream' if empty."
+}
+
+variable "replay_machine_type" {
+  type        = string
+  default     = "n1-standard-2"
+  description = "Machine type for the Dataflow replay worker VMs."
+}
+
+variable "replay_max_workers" {
+  type        = number
+  default     = 2
+  description = "Maximum number of worker instances for the replay pipeline."
+}
+
+variable "replay_on_delete" {
+  type        = string
+  default     = "drain"
+  description = "Action when deleting the replay Dataflow job: 'drain' or 'cancel'."
+  validation {
+    condition     = contains(["drain", "cancel"], var.replay_on_delete)
+    error_message = "replay_on_delete must be either 'drain' or 'cancel'."
+  }
+}
+
+# ------------------------------------------------------------------------------
 # Storage & Pub/Sub Configuration
 # ------------------------------------------------------------------------------
 
@@ -196,4 +250,134 @@ variable "enable_required_apis" {
   type        = bool
   default     = true
   description = "Whether Terraform should automatically enable required GCP APIs (logging, pubsub, dataflow, storage, secretmanager)."
+}
+
+# ------------------------------------------------------------------------------
+# Cloud Run & Artifact Registry Configuration (Optional Service Deployment)
+# ------------------------------------------------------------------------------
+
+variable "location" {
+  type        = string
+  default     = "us-central1"
+  description = "Location for Cloud Run and Artifact Registry resources."
+}
+
+variable "artifact_type" {
+  type        = string
+  default     = "DOCKER"
+  description = "Format of packages stored in Artifact Registry."
+}
+
+variable "artifact_repository_description" {
+  type        = string
+  default     = "Docker repository for Cloud Run services"
+  description = "Description for Artifact Registry repository."
+}
+
+variable "artifact_repository_id" {
+  type        = string
+  default     = "cloud-run-repo"
+  description = "ID of the Artifact Registry repository."
+}
+
+variable "run_image_push_script" {
+  type        = string
+  default     = "scripts/build_and_push.sh"
+  description = "Relative path to local image build/push script."
+}
+
+variable "cloud_run_sa_account_id" {
+  type        = string
+  default     = "cloud-run-sa"
+  description = "Service account ID for Cloud Run service."
+}
+
+variable "cloud_run_sa_display_name" {
+  type        = string
+  default     = "Cloud Run Service Account"
+  description = "Display name for Cloud Run service account."
+}
+
+variable "cloud_run_sa_permissions" {
+  type        = list(string)
+  default     = ["roles/logging.logWriter"]
+  description = "List of IAM roles granted to Cloud Run service account."
+}
+
+variable "neg_name" {
+  type        = string
+  default     = "cloud-run-neg"
+  description = "Name of the Serverless Network Endpoint Group."
+}
+
+variable "cloud_run_deletion_protection" {
+  type        = bool
+  default     = false
+  description = "Whether deletion protection is enabled on Cloud Run."
+}
+
+variable "cloud_run_ingress" {
+  type        = string
+  default     = "INGRESS_TRAFFIC_ALL"
+  description = "Ingress settings for Cloud Run."
+}
+
+variable "cloud_run_min_instance_count" {
+  type        = number
+  default     = 0
+  description = "Minimum instances for Cloud Run."
+}
+
+variable "cloud_run_max_instance_count" {
+  type        = number
+  default     = 5
+  description = "Maximum instances for Cloud Run."
+}
+
+variable "cloud_run_max_instance_request_concurrency" {
+  type        = number
+  default     = 80
+  description = "Max concurrent requests per Cloud Run instance."
+}
+
+variable "cloud_run_service_name" {
+  type        = string
+  default     = "sample-cloud-run-app"
+  description = "Cloud Run service name."
+}
+
+variable "cloud_run_container_port" {
+  type        = number
+  default     = 8080
+  description = "Port exposed by Cloud Run container."
+}
+
+variable "cloud_run_env" {
+  type        = any
+  default     = []
+  description = "Environment variables for Cloud Run container."
+}
+
+variable "cloud_run_cpu_idle" {
+  type        = bool
+  default     = true
+  description = "Whether CPU is throttled when not serving requests."
+}
+
+variable "cloud_run_startup_cpu_boost" {
+  type        = bool
+  default     = false
+  description = "Whether startup CPU boost is enabled."
+}
+
+variable "cloud_run_image_tag" {
+  type        = string
+  default     = "latest"
+  description = "Docker image tag for Cloud Run."
+}
+
+variable "cloud_run_invoker_members" {
+  type        = list(string)
+  default     = ["allUsers"]
+  description = "Members allowed to invoke Cloud Run service."
 }
